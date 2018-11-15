@@ -51,5 +51,6 @@ public class MapaFragment extends SupportMapFragment implements
             return;
         }
         miMapa.setMyLocationEnabled(true);
+        
     }
 }
