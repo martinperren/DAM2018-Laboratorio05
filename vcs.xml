@@ -30,6 +30,10 @@
           <option name="url" value="https://github.com/martinperren/DAM2018-Laboratorio05" />
           <option name="userName" value="" />
         </UrlAndUserName>
+        <UrlAndUserName>
+          <option name="url" value="https://github.com/martinperren/DAM2018-Laboratorio05/tree/develop" />
+          <option name="userName" value="" />
+        </UrlAndUserName>
       </list>
     </option>
     <option name="cloneParentDir" value="C:\Users\MARTIN\Downloads\Telegram Desktop" />
