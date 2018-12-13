@@ -14,20 +14,27 @@ import android.widget.TextView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapaFragment extends SupportMapFragment implements
-        OnMapReadyCallback {
+public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
+
     private GoogleMap miMapa;
-    public MapaFragment() { }
+    private int tipoMapa;
+    private OnMapaListener listener;
+
+    public MapaFragment(){
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup
             container, Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container,
                 savedInstanceState);
-        int tipoMapa=0;
+        tipoMapa=0;
         Bundle argumentos = getArguments();
         if(argumentos !=null) {
             tipoMapa = argumentos.getInt("tipo_mapa",0);
@@ -39,6 +46,14 @@ public class MapaFragment extends SupportMapFragment implements
     public void onMapReady(GoogleMap googleMap) {
         miMapa = googleMap;
         actualizarMapa();
+        if(tipoMapa == 1){
+            miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                @Override
+                public void onMapLongClick(LatLng latLng) {
+                    listener.coordenadasSeleccionadas(latLng);
+                }
+            });
+        }
     }
     private void actualizarMapa() {
         if (ActivityCompat.checkSelfPermission(this.getContext(),Manifest.permission.ACCESS_FINE_LOCATION)
@@ -52,5 +67,13 @@ public class MapaFragment extends SupportMapFragment implements
         }
         miMapa.setMyLocationEnabled(true);
         
+    }
+
+    public void setListener(OnMapaListener listener) {
+        this.listener = listener;
+    }
+
+    public interface OnMapaListener {
+        public void coordenadasSeleccionadas(LatLng c);
     }
 }
