@@ -26,10 +26,10 @@ public class ListaReclamosFragment extends Fragment {
     private List<Reclamo> listaReclamos;
     private ListView lvReclamos;
     private ReclamoDao reclamoDao;
+
     public ListaReclamosFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -82,7 +82,7 @@ public class ListaReclamosFragment extends Fragment {
             Fragment f = new MapaFragment();// setear el fragmento del mapa
             Bundle args = new Bundle();
             // setear los parametros tipo_mapa y idReclamo en el Bundle args
-            args.putInt("tipo_mapa", 2);
+            args.putInt("tipo_mapa", 1);
             args.putInt("idReclamo", id);
             f.setArguments(args);
             getActivity().getSupportFragmentManager()

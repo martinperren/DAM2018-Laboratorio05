@@ -69,7 +69,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             });
         }
         else {
-            if(tipoMapa == 1){
+            if(tipoMapa == 2){
                 cargarMapaConReclamos();
             }
         }
@@ -94,8 +94,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                                     .snippet(r.getReclamo()));
                             builder.include(marker.getPosition());
                         }
-                        LatLngBounds LIMITE = builder.build();
-                        miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(LIMITE, 10));
+                        LatLngBounds limite = builder.build();
+                        miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limite, 0));
                     }
                 });
             }

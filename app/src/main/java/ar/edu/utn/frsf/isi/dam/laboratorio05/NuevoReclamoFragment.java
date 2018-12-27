@@ -81,7 +81,6 @@ public class NuevoReclamoFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 listener.obtenerCoordenadas();
-
             }
         });
 
@@ -150,6 +149,8 @@ public class NuevoReclamoFragment extends Fragment {
                         mail.setText(R.string.texto_vacio);
                         tvCoord.setText(R.string.texto_vacio);
                         reclamoDesc.setText(R.string.texto_vacio);
+                        String coordenadas = "0;0";
+                        tvCoord.setText(coordenadas);
                         getActivity().getFragmentManager().popBackStack();
                     }
                 });
