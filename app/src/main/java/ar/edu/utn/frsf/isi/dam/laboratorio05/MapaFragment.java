@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,6 +24,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.Gradient;
@@ -43,6 +46,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private GoogleMap miMapa;
     private int tipoMapa;
     private int idReclamoSeleccionado;
+    private String tipoDeReclamo;
     private OnMapaListener listener;
 
     private ReclamoDao reclamoDao;
@@ -64,6 +68,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         if(argumentos !=null) {
             tipoMapa = argumentos.getInt("tipo_mapa",0);
             idReclamoSeleccionado = argumentos.getInt("idReclamoSeleccionado",0);
+            tipoDeReclamo = argumentos.getString("tipo_reclamo","");
         }
         getMapAsync(this);
         return rootView;
@@ -90,9 +95,50 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             case 4:
                 cargarMapaDeCalorDeLosReclamos();
                 break;
+            case 5:
+                cargarMapaPorTipoDeReclamo(tipoDeReclamo);
+                break;
             default:
                 break;
         }
+    }
+
+    private void cargarMapaPorTipoDeReclamo(final String reclamoTipo){
+
+        reclamoDao = MyDatabase.getInstance(getContext()).getReclamoDao();
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                reclamos = reclamoDao.getByTipo(reclamoTipo);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        PolylineOptions unionLinea = new PolylineOptions();
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        for(Reclamo r : reclamos){
+                            Marker marker = miMapa.addMarker(new MarkerOptions()
+                                    .position(new LatLng(r.getLatitud(),r.getLongitud()))
+                                    .title(r.getId() + "[" + r.getTipo().toString() + "]")
+                                    .snippet(r.getReclamo()));
+                            builder.include(marker.getPosition());
+
+                            unionLinea.add(new LatLng(r.getLatitud(),r.getLongitud()));
+                        }
+                        if(reclamos.size() > 0){
+                            LatLngBounds limite = builder.build();
+                            miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limite, 0));
+                            Polyline polilinea = miMapa.addPolyline(unionLinea);
+                        }
+                        else Toast.makeText(getActivity(), "No existen reclamos de este tipo",
+                                Toast.LENGTH_LONG).show();
+
+                    }
+                });
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void cargarMapaDeCalorDeLosReclamos(){
