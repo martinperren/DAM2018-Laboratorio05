@@ -60,12 +60,18 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 fragmentTransaction = true;
                                 break;
                             case R.id.optVerMapa:
-                                //TODO HABILITAR
                                 tag="mapaReclamos";
                                 fragment =  getSupportFragmentManager().findFragmentByTag(tag);
                                 //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
-                                if(fragment==null) fragment = new MapaFragment();
+                                if(fragment==null) {
+                                    fragment = new MapaFragment();
+
+                                    Bundle bundle = new Bundle();
+                                    bundle.putInt("tipo_mapa",2);
+                                    fragment.setArguments(bundle);
+                                }
                                 //configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
+                                ((MapaFragment)fragment).setListener(MainActivity.this);
                                 fragmentTransaction = true;
                                 break;
                             case R.id.optHeatMap:
@@ -108,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
     @Override
     public void onBackStackChanged() {
-
         shouldDisplayHomeUp();
     }
 
@@ -125,20 +130,20 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
     // como ubicación del reclamo
 
     @Override
-        public void coordenadasSeleccionadas(LatLng c) {
-                String tag = "nuevoReclamoFragment";
-            Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-            if(fragment==null) {
-                fragment = new NuevoReclamoFragment();
-                ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
-            }
-            Bundle bundle = new Bundle();
-            bundle.putString("latLng",c.latitude+";"+c.longitude);
-            fragment.setArguments(bundle);
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.contenido, fragment,tag)
-                    .commit();
+    public void coordenadasSeleccionadas(LatLng c) {
+        String tag = "nuevoReclamoFragment";
+        Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+        if(fragment==null) {
+            fragment = new NuevoReclamoFragment();
+            ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString("latLng",c.latitude+";"+c.longitude);
+        fragment.setArguments(bundle);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.contenido, fragment,tag)
+                .commit();
     }
 
 
