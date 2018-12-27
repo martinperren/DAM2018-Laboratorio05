@@ -3,6 +3,7 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -33,6 +37,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
     private GoogleMap miMapa;
     private int tipoMapa;
+    private int idReclamoSeleccionado;
     private OnMapaListener listener;
 
     private ReclamoDao reclamoDao;
@@ -70,12 +75,12 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         }
         else {
             if(tipoMapa == 2){
-                cargarMapaConReclamos();
+                cargarMapaConTodosReclamos();
             }
         }
     }
 
-    private void cargarMapaConReclamos(){
+    private void cargarMapaConTodosReclamos(){
 
         reclamoDao = MyDatabase.getInstance(getContext()).getReclamoDao();
 
