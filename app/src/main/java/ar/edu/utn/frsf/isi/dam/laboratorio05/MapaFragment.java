@@ -57,6 +57,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         Bundle argumentos = getArguments();
         if(argumentos !=null) {
             tipoMapa = argumentos.getInt("tipo_mapa",0);
+            idReclamoSeleccionado = argumentos.getInt("idReclamoSeleccionado",0);
         }
         getMapAsync(this);
         return rootView;
@@ -65,19 +66,57 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     public void onMapReady(GoogleMap googleMap) {
         miMapa = googleMap;
         actualizarMapa();
-        if(tipoMapa == 1){
-            miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-                @Override
-                public void onMapLongClick(LatLng latLng) {
-                    listener.coordenadasSeleccionadas(latLng);
-                }
-            });
-        }
-        else {
-            if(tipoMapa == 2){
+        switch (tipoMapa){
+            case 1:
+                miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(LatLng latLng) {
+                        listener.coordenadasSeleccionadas(latLng);
+                    }
+                });
+                break;
+            case 2:
                 cargarMapaConTodosReclamos();
-            }
+                break;
+            case 3:
+                cargarMapaReclamoSeleccionado(idReclamoSeleccionado);
         }
+    }
+
+    private void cargarMapaReclamoSeleccionado(final int idReclamo){
+
+        reclamoDao = MyDatabase.getInstance(getContext()).getReclamoDao();
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                final Reclamo reclamo = reclamoDao.getById(idReclamo);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        Marker marker = miMapa.addMarker(new MarkerOptions()
+                                .position(new LatLng(reclamo.getLatitud(),reclamo.getLongitud()))
+                                .title(reclamo.getId() + "[" + reclamo.getTipo().toString() + "]")
+                                .snippet(reclamo.getReclamo()));
+                        CameraPosition cameraPosition = new CameraPosition.Builder()
+                                .target(new LatLng(reclamo.getLatitud(),reclamo.getLongitud()))
+                                .zoom(15)
+                                .build();
+                        CircleOptions circleOptions = new CircleOptions()
+                                .center(new LatLng(reclamo.getLatitud(),reclamo.getLongitud()))
+                                .radius(500)
+                                .strokeColor(Color.RED)
+                                .fillColor(0x5500ff00)
+                                .strokeWidth(5);
+                        Circle circle = miMapa.addCircle(circleOptions);
+                        miMapa.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    }
+                });
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void cargarMapaConTodosReclamos(){
