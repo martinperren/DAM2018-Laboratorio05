@@ -23,7 +23,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.maps.android.heatmaps.Gradient;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
@@ -41,11 +46,12 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private OnMapaListener listener;
 
     private ReclamoDao reclamoDao;
+    private HeatmapTileProvider mProvider;
+    private TileOverlay mOverlay;
 
     private List<Reclamo> reclamos;
 
     public MapaFragment(){
-
     }
 
     @Override
@@ -80,7 +86,59 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 break;
             case 3:
                 cargarMapaReclamoSeleccionado(idReclamoSeleccionado);
+                break;
+            case 4:
+                cargarMapaDeCalorDeLosReclamos();
+                break;
+            default:
+                break;
         }
+    }
+
+    private void cargarMapaDeCalorDeLosReclamos(){
+
+        reclamoDao = MyDatabase.getInstance(getContext()).getReclamoDao();
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                reclamos = reclamoDao.getAll();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<LatLng> list = new ArrayList<>();
+                        for(Reclamo r : reclamos){
+                            LatLng latLng = new LatLng(r.getLatitud(),r.getLongitud());
+                            list.add(latLng);
+                        }
+                        // Create the gradient.
+                        int[] colors = {
+                                Color.rgb(102, 225, 0), // green
+                                Color.rgb(255, 0, 0)    // red
+                        };
+
+                        float[] startPoints = {
+                                0.2f, 1f
+                        };
+
+                        Gradient gradient = new Gradient(colors, startPoints);
+
+                        // Create a heat map tile provider, passing it the latlngs of the police stations.
+                        mProvider = new HeatmapTileProvider.Builder()
+                                .data(list)
+                                .gradient(gradient)
+                                .build();
+                        // Add a tile overlay to the map, using the heat map tile provider.
+                        mOverlay = miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+
+                        mProvider.setOpacity(0.7);
+                        mOverlay.clearTileCache();
+                    }
+                });
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void cargarMapaReclamoSeleccionado(final int idReclamo){
