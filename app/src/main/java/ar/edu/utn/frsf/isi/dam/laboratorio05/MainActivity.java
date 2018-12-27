@@ -90,6 +90,15 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 ((MapaFragment)fragment).setListener(MainActivity.this);
                                 fragmentTransaction = true;
                                 break;
+                            case R.id.optFormularioBusqueda:
+                                tag = "formularioBusquedaFragment";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment==null) {
+                                    fragment = new FormularioBusquedaFragment();
+                                }
+
+                                fragmentTransaction = true;
+                                break;
                         }
 
                         if(fragmentTransaction) {
