@@ -16,6 +16,7 @@ public class Reclamo {
     private Double longitud;
     private String reclamo;
     private String email;
+    private String path;
     @TypeConverters(TipoReclamoConverter.class)
     private TipoReclamo tipo;
 
@@ -41,6 +42,14 @@ public class Reclamo {
 
     public void setReclamo(String reclamo) {
         this.reclamo = reclamo;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getEmail() {
