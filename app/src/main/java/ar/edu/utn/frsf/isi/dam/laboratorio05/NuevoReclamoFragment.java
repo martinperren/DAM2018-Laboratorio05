@@ -78,7 +78,7 @@ public class NuevoReclamoFragment extends Fragment {
     private String mFileName;
     private Boolean grabando = false;
     private Boolean reproduciendo = false;
-    private String pathAudio ;
+    private String pathAudio = null;
 
     private Boolean permisoMic = false;
     private Boolean permisoWrite = false;
@@ -141,12 +141,13 @@ public class NuevoReclamoFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
 
-                if(reclamoDesc.getText().length() > 7 && !(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString()))){
+                /*if(reclamoDesc.getText().length() > 7 && !(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString()))){
                     btnGuardar.setEnabled(true);
                 }
                 else{
                     if(pathAudio == null) btnGuardar.setEnabled(false);
-                }
+                }*/
+                btnGuardar.setEnabled(estadoBtnGuardar(tipoReclamo.getSelectedItem().toString(),reclamoDesc.getText().toString(),pathAudio,pathFoto));
             }
 
             @Override
@@ -198,7 +199,7 @@ public class NuevoReclamoFragment extends Fragment {
         tipoReclamo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString())){
+                /*if(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString())){
                     if(imgReclamo.getDrawable() != null) btnGuardar.setEnabled(true);
                     else btnGuardar.setEnabled(false);
                 }
@@ -207,7 +208,8 @@ public class NuevoReclamoFragment extends Fragment {
                         btnGuardar.setEnabled(false);
                     }
                     else btnGuardar.setEnabled(true);
-                }
+                }*/
+                btnGuardar.setEnabled(estadoBtnGuardar(tipoReclamo.getSelectedItem().toString(),reclamoDesc.getText().toString(),pathAudio,pathFoto));
             }
 
             @Override
@@ -486,6 +488,43 @@ public class NuevoReclamoFragment extends Fragment {
         };
         Thread t1 = new Thread(hiloActualizacion);
         t1.start();
+    }
+
+    public boolean estadoBtnGuardar(String reclamoTipo, String reclamoD, String pathAudio, String pathFoto){
+        if(reclamoTipo.equals(Reclamo.TipoReclamo.VEREDAS.toString())|| reclamoTipo.equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString())){
+            if(pathFoto != null) return true;
+            else return false;
+        }
+        else{
+            if(pathAudio == null && reclamoD.length() < 8){
+                return false;
+            }
+            else return true;
+        }
+    }
+
+    public EditText getReclamoDesc() {
+        return reclamoDesc;
+    }
+
+    public void setReclamoDesc(String reclamoDesc) {
+        this.reclamoDesc.setText(reclamoDesc);
+    }
+
+    public String getPathAudio() {
+        return pathAudio;
+    }
+
+    public void setPathAudio(String pathAudio) {
+        this.pathAudio = pathAudio;
+    }
+
+    public ImageView getImgReclamo() {
+        return imgReclamo;
+    }
+
+    public void setImgReclamo(ImageView imgReclamo) {
+        this.imgReclamo = imgReclamo;
     }
 
 }
