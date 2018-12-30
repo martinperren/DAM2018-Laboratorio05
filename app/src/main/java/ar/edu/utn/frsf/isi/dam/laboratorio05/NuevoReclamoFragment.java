@@ -16,10 +16,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -93,7 +96,7 @@ public class NuevoReclamoFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_nuevo_reclamo, container, false);
 
-        pathAudio = Environment.getExternalStorageDirectory().getAbsolutePath()+"/audiorecordtest.3gp";
+        //pathAudio = Environment.getExternalStorageDirectory().getAbsolutePath()+"/audiorecordtest.3gp";
         //ActivityCompat.requestPermissions(this.getActivity(), permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
 
@@ -133,6 +136,30 @@ public class NuevoReclamoFragment extends Fragment {
         btnReproducirAudio.setEnabled(edicionActivada);
         imgReclamo.setEnabled(edicionActivada);
 
+        reclamoDesc.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+
+                if(reclamoDesc.getText().length() > 7 && !(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString()))){
+                    btnGuardar.setEnabled(true);
+                }
+                else{
+                    if(pathAudio == null) btnGuardar.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int arg1, int arg2, int arg3) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+            }
+
+        });
+
         buscarCoord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -168,6 +195,26 @@ public class NuevoReclamoFragment extends Fragment {
             }
         });
 
+        tipoReclamo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString())){
+                    if(imgReclamo.getDrawable() != null) btnGuardar.setEnabled(true);
+                    else btnGuardar.setEnabled(false);
+                }
+                else{
+                    if(pathAudio == null && reclamoDesc.getText().length() < 8){
+                        btnGuardar.setEnabled(false);
+                    }
+                    else btnGuardar.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                //Another interface callback
+            }
+        });
         return v;
     }
 
@@ -201,6 +248,11 @@ public class NuevoReclamoFragment extends Fragment {
                         else{
                             ((Button) view).setText("grabando.....");
                             grabando=true;
+                            try {
+                                pathAudio = generarPathDeAudio();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                             grabar();
                         }
                         //((Button) view).setText("grabando.....");
@@ -255,6 +307,21 @@ public class NuevoReclamoFragment extends Fragment {
         }
     }
 
+    private String generarPathDeAudio() throws IOException {
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new Date());
+        String nombre = "AUD" + timeStamp + "__";
+        File fileDir = getActivity().getExternalFilesDir(Environment.getExternalStorageDirectory().getAbsolutePath());
+        File audio = File.createTempFile(
+                nombre, /* prefix */
+                ".3gp", /* suffix */
+                fileDir /* directory */
+        );
+
+        return audio.getAbsolutePath();
+    }
+
     private void grabar() {
         //final File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), mFileName);
         mRecorder = new MediaRecorder();
@@ -274,6 +341,9 @@ public class NuevoReclamoFragment extends Fragment {
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
+        if(!(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString()))){
+            btnGuardar.setEnabled(true);
+        }
     }
 
     private void reproducir() {
@@ -322,6 +392,10 @@ public class NuevoReclamoFragment extends Fragment {
             }
             if (imageBitmap != null) {
                 imgReclamo.setImageBitmap(imageBitmap);
+                if(tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.VEREDAS.toString())||tipoReclamo.getSelectedItem().toString().equals(Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO.toString())){
+                    btnGuardar.setEnabled(true);
+                }
+
             }
 
         }
