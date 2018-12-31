@@ -128,7 +128,9 @@ public class NuevoReclamoFragment extends Fragment {
 
         cargarReclamo(idReclamo);
 
-
+        if(coordenadas!=null){
+            tvCoord.setText(coordenadas);
+        }
         boolean edicionActivada = !tvCoord.getText().toString().equals("0;0");
         reclamoDesc.setEnabled(edicionActivada );
         mail.setEnabled(edicionActivada );
