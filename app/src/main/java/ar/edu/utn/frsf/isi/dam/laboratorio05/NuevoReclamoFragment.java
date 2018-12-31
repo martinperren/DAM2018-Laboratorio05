@@ -85,6 +85,9 @@ public class NuevoReclamoFragment extends Fragment {
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
 
+    private String coordenadas=null;
+    private Reclamo.TipoReclamo tipoReclamoSeleccionado;
+
     public NuevoReclamoFragment() {
     }
 
@@ -171,6 +174,7 @@ public class NuevoReclamoFragment extends Fragment {
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                coordenadas = tvCoord.getText().toString();
                 saveOrUpdateReclamo();
             }
         });
@@ -209,6 +213,7 @@ public class NuevoReclamoFragment extends Fragment {
                     }
                     else btnGuardar.setEnabled(true);
                 }*/
+                tipoReclamoSeleccionado = tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition());
                 btnGuardar.setEnabled(estadoBtnGuardar(tipoReclamo.getSelectedItem().toString(),reclamoDesc.getText().toString(),pathAudio,pathFoto));
             }
 
@@ -414,16 +419,19 @@ public class NuevoReclamoFragment extends Fragment {
                         public void run() {
                             mail.setText(reclamoActual.getEmail());
                             tvCoord.setText(reclamoActual.getLatitud()+";"+reclamoActual.getLongitud());
+                            coordenadas = reclamoActual.getLatitud()+";"+reclamoActual.getLongitud();
                             reclamoDesc.setText(reclamoActual.getReclamo());
-                            File file = new File(reclamoActual.getPathImagen());
-                            Bitmap imageBitmap = null;
-                            try {
-                                imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.fromFile(file));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            if (imageBitmap != null) {
-                                imgReclamo.setImageBitmap(imageBitmap);
+                            if(reclamoActual.getPathImagen() != null){
+                                File file = new File(reclamoActual.getPathImagen());
+                                Bitmap imageBitmap = null;
+                                try {
+                                    imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.fromFile(file));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                if (imageBitmap != null) {
+                                    imgReclamo.setImageBitmap(imageBitmap);
+                                }
                             }
                             pathAudio= reclamoActual.getPathAudio();
                             Reclamo.TipoReclamo[] tipos= Reclamo.TipoReclamo.values();
@@ -448,16 +456,22 @@ public class NuevoReclamoFragment extends Fragment {
 
     }
 
-    private void saveOrUpdateReclamo(){
+    public void saveOrUpdateReclamo(){
         reclamoActual.setEmail(mail.getText().toString());
         reclamoActual.setReclamo(reclamoDesc.getText().toString());
-        reclamoActual.setTipo(tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition()));
+        //reclamoActual.setTipo(tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition()));
+        reclamoActual.setTipo(tipoReclamoSeleccionado);
         reclamoActual.setPathImagen(pathFoto);
         reclamoActual.setPathAudio(pathAudio);
-        if(tvCoord.getText().toString().length()>0 && tvCoord.getText().toString().contains(";")) {
+        /*if(tvCoord.getText().toString().length()>0 && tvCoord.getText().toString().contains(";")) {
             String[] coordenadas = tvCoord.getText().toString().split(";");
             reclamoActual.setLatitud(Double.valueOf(coordenadas[0]));
             reclamoActual.setLongitud(Double.valueOf(coordenadas[1]));
+        }*/
+        if(coordenadas.length()>0 && coordenadas.contains(";")) {
+            String[] coord = coordenadas.split(";");
+            reclamoActual.setLatitud(Double.valueOf(coord[0]));
+            reclamoActual.setLongitud(Double.valueOf(coord[1]));
         }
         Runnable hiloActualizacion = new Runnable() {
             @Override
@@ -469,6 +483,8 @@ public class NuevoReclamoFragment extends Fragment {
                     @Override
                     public void run() {
                         // limpiar vista
+                        coordenadas= null;
+                        tipoReclamoSeleccionado = null;
                         pathAudio = null;
                         pathFoto = null;
                         mail.setText(R.string.texto_vacio);
@@ -503,6 +519,22 @@ public class NuevoReclamoFragment extends Fragment {
         }
     }
 
+    public Reclamo getReclamo(){
+        return this.reclamoActual;
+    }
+
+    public void setReclamo(Reclamo reclamo){
+        this.reclamoActual = reclamo;
+    }
+
+    public ReclamoDao getReclamoDao(){
+        return this.reclamoDao;
+    }
+
+    public void setReclamoDao(ReclamoDao reclamoDao){
+        this.reclamoDao = reclamoDao;
+    }
+
     public EditText getReclamoDesc() {
         return reclamoDesc;
     }
@@ -519,6 +551,22 @@ public class NuevoReclamoFragment extends Fragment {
         this.pathAudio = pathAudio;
     }
 
+    public String getPathImagen() {
+        return pathFoto;
+    }
+
+    public void setCoordenadas(String coordenadas) {
+        this.coordenadas = coordenadas;
+    }
+
+    public String getCoordenadas() {
+        return coordenadas;
+    }
+
+    public void setPathImagen(String pathImagen) {
+        this.pathFoto = pathImagen;
+    }
+
     public ImageView getImgReclamo() {
         return imgReclamo;
     }
@@ -527,4 +575,43 @@ public class NuevoReclamoFragment extends Fragment {
         this.imgReclamo = imgReclamo;
     }
 
+    public EditText getEditTextMail() {
+        return mail;
+    }
+
+    public void setEditTextMail(EditText editTextMail) {
+        this.mail = editTextMail;
+    }
+
+    public EditText getEditTextDesc() {
+        return reclamoDesc;
+    }
+
+    public void setEditTextDesc(EditText editTextDesc) {
+        this.reclamoDesc = editTextDesc;
+    }
+
+    public TextView getTvCoor() {
+        return tvCoord;
+    }
+
+    public void setTvCoor(TextView tvCoor) {
+        this.tvCoord = tvCoor;
+    }
+
+    public Button getBtnGuardar() {
+        return btnGuardar;
+    }
+
+    public void setBtnGuardar(Button btnGuardar) {
+        this.btnGuardar = btnGuardar;
+    }
+
+    public Reclamo.TipoReclamo getTipoReclamoSeleccionado() {
+        return tipoReclamoSeleccionado;
+    }
+
+    public void setTipoReclamoSeleccionado(Reclamo.TipoReclamo tipoReclamoSeleccionado) {
+        this.tipoReclamoSeleccionado = tipoReclamoSeleccionado;
+    }
 }
